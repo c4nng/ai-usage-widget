@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Usage Widget</title>
+  </head>
+  <body class="widget">
+    <div id="shell" class="shell">
+      <!-- Edge mode: the drop hanging from the top of the screen. -->
+      <button id="drop" class="drop" aria-label="AI usage">
+        <span id="drop-cells" class="drop-cells"></span>
+        <span id="drop-value" class="drop-value"></span>
+      </button>
+
+      <main id="app" class="note">
+        <div class="panel">
+          <div class="panel-body">
+            <header id="top" class="top">
+              <span id="mark" class="mark"></span>
+              <span class="controls">
+                <button id="refresh" class="icon-button" data-action="refresh" aria-label="Refresh"></button>
+                <button id="settings" class="icon-button" data-action="settings" aria-label="Settings"></button>
+                <button id="pin" class="icon-button edge-only" data-action="pin" aria-label="Keep open"></button>
+                <button id="hide" class="icon-button desktop-only" data-action="hide" aria-label="Hide"></button>
+              </span>
+            </header>
+            <div id="rows" class="rows"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script type="module" src="/src/widget.ts"></script>
+  </body>
+</html>

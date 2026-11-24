@@ -1,0 +1,170 @@
+@font-face {
+  font-family: "Departure Mono";
+  src: url("../fonts/DepartureMono-Regular.woff2") format("woff2");
+  font-display: block;
+}
+
+/* Monochrome on purpose: one foreground, one mid grey for secondary pixels, one dim grey for empty cells. */
+:root {
+  --surface-alpha: 0.94;
+  --font: "Departure Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
+
+  /* Pixel-stepped corners (2px steps), used with clip-path. */
+  --notch: polygon(
+    0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0,
+    calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+  /* Same, but square at the top: for things hanging from the screen edge. */
+  --notch-bottom: polygon(
+    0 0, 100% 0,
+    100% calc(100% - 6px), calc(100% - 2px) calc(100% - 6px), calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px),
+    calc(100% - 4px) calc(100% - 2px), calc(100% - 6px) calc(100% - 2px), calc(100% - 6px) 100%,
+    6px 100%, 6px calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px), 2px calc(100% - 6px), 0 calc(100% - 6px)
+  );
+  --pixel-shadow: drop-shadow(3px 3px 0 rgb(0 0 0 / 0.45));
+}
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-rgb: 15 14 18;
+  --fg: #f2f2f0;
+  --mid: #75747a;
+  --faint: #4b4a50;
+  --dim: #26252b;
+  --edge: #34333a;
+  --line: rgb(255 255 255 / 0.07);
+  --hover: rgb(255 255 255 / 0.05);
+  --input: rgb(255 255 255 / 0.04);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --surface-rgb: 244 243 239;
+  --fg: #141316;
+  --mid: #86858b;
+  --faint: #a9a8ad;
+  --dim: #dddbd5;
+  --edge: #c9c7c0;
+  --line: rgb(0 0 0 / 0.08);
+  --hover: rgb(0 0 0 / 0.04);
+  --input: rgb(255 255 255 / 0.7);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--fg);
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.px {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.px-w {
+  fill: currentColor;
+}
+
+.px-g {
+  fill: var(--mid);
+}
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--mid);
+}
+
+.icon-button .px {
+  width: 10px;
+  height: 10px;
+}
+
+.icon-button:hover {
+  background: var(--hover);
+  color: var(--fg);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 1px;
+}
+
+/* Pixel cells: the bar every meter is drawn with. */
+.cells {
+  display: grid;
+  grid-template-columns: repeat(var(--cells, 28), 1fr);
+  gap: 2px;
+  height: 6px;
+}
+
+.cells i {
+  background: var(--dim);
+}
+
+.cells i.on {
+  background: var(--fg);
+}
+
+.cells.mini {
+  height: 3px;
+  gap: 1px;
+}
+
+.cells.mini i.on {
+  background: var(--mid);
+}
+
+/* Pixel scrollbar: square thumb on a dithered track. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: repeating-conic-gradient(var(--dim) 0 25%, transparent 0 50%) 0 0 / 2px 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--mid);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--fg);
+}
+
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-corner {
+  display: none;
+  background: transparent;
+}

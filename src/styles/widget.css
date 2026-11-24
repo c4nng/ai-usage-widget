@@ -1,0 +1,396 @@
+/* The window itself is transparent; only the drop and the panel are painted. */
+html {
+  overflow: hidden;
+}
+
+/* No overflow clipping here: in edge mode everything is absolutely positioned,
+   so the body has no height and would clip it all away. */
+html,
+body.widget {
+  background: transparent;
+  user-select: none;
+  cursor: default;
+}
+
+.shell {
+  position: relative;
+}
+
+/* ---------------------------------------------------------------- drop */
+
+.drop {
+  display: none;
+}
+
+.mode-edge .drop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 64px;
+  height: 22px;
+  padding: 0 0 2px;
+  border: 0;
+  background: var(--edge);
+  clip-path: var(--notch-bottom);
+  color: var(--fg);
+  transition: transform 0.12s steps(2);
+}
+
+/* Inner face, one pixel in from the border colour. */
+.mode-edge .drop::before {
+  content: "";
+  position: absolute;
+  inset: 0 1px 1px;
+  background: rgb(var(--surface-rgb) / var(--surface-alpha));
+  clip-path: var(--notch-bottom);
+  z-index: -1;
+}
+
+.drop {
+  isolation: isolate;
+}
+
+/* The drip: a single pixel that falls while you hover. */
+.mode-edge .shell::after {
+  content: "";
+  position: absolute;
+  left: 31px;
+  top: 22px;
+  width: 2px;
+  height: 2px;
+  background: var(--mid);
+  opacity: 0;
+}
+
+.mode-edge .shell:has(.drop:hover)::after {
+  animation: drip 0.9s steps(3) infinite;
+}
+
+.drop-value {
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.drop-meter {
+  --cells: 4;
+  width: 15px;
+  height: 6px;
+  gap: 1px;
+}
+
+.drop.is-alert .drop-value {
+  animation: blink 1s steps(2) infinite;
+}
+
+.mode-edge .shell.open .drop,
+.mode-edge .shell.closing .drop {
+  visibility: hidden;
+}
+
+/* ---------------------------------------------------------------- panel */
+
+.note {
+  width: 268px;
+  padding: 0 4px 4px 0;
+  filter: var(--pixel-shadow);
+}
+
+.panel {
+  padding: 1px;
+  background: var(--edge);
+  clip-path: var(--notch);
+}
+
+.panel-body {
+  padding: 10px 14px 14px;
+  background: rgb(var(--surface-rgb) / var(--surface-alpha));
+  clip-path: var(--notch);
+}
+
+/* Hanging from the top edge: square top, stepped bottom, no top border. */
+.mode-edge .panel,
+.mode-edge .panel-body {
+  clip-path: var(--notch-bottom);
+}
+
+.mode-edge .panel {
+  padding-top: 0;
+}
+
+/* Edge mode: hidden until the drop is hovered, then revealed top-down in pixel steps. */
+.mode-edge .note {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+}
+
+.mode-edge .shell.open .note {
+  visibility: visible;
+  animation: reveal 0.26s steps(9, end) both;
+}
+
+.mode-edge .shell.closing .note {
+  visibility: visible;
+  animation: conceal 0.19s steps(6, end) both;
+}
+
+.mode-edge .shell.opening .row {
+  animation: row-in 0.3s steps(4, end) both;
+  animation-delay: calc(60ms + var(--i, 0) * 45ms);
+}
+
+.edge-only,
+.desktop-only {
+  display: none;
+}
+
+.mode-edge .edge-only,
+.mode-desktop .desktop-only {
+  display: inline-grid;
+}
+
+/* ---------------------------------------------------------------- header */
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 20px;
+  margin-bottom: 8px;
+}
+
+.mode-edge .top {
+  cursor: ew-resize;
+}
+
+.mode-edge .top.dragging {
+  cursor: grabbing;
+}
+
+.mark .px {
+  width: 10px;
+  height: 10px;
+  color: var(--fg);
+}
+
+/* Controls only show up while the pointer is over the panel (or when pinned). */
+.controls {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s steps(3);
+}
+
+.note:hover .controls,
+.controls:focus-within,
+.controls:has(.is-on) {
+  opacity: 1;
+}
+
+.icon-button.is-on {
+  color: var(--fg);
+}
+
+.busy .px {
+  animation: blink 0.5s steps(2) infinite;
+}
+
+/* ---------------------------------------------------------------- rows */
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.row-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 7px;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+
+.glyph {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row-head:hover .name {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--mid);
+  text-underline-offset: 3px;
+}
+
+.value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ≥ 85%: a single blinking pixel instead of a colour change. */
+.alert {
+  width: 5px;
+  height: 5px;
+  background: var(--fg);
+  animation: blink 1s steps(2) infinite;
+}
+
+.row.is-failed .glyph,
+.row.is-failed .name,
+.row.is-failed .value,
+.row.is-stale .value {
+  color: var(--mid);
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 0 0 22px;
+  /* Dotted pixel divider. */
+  background: linear-gradient(90deg, var(--faint) 2px, transparent 2px) 0 0 / 4px 1px repeat-x;
+}
+
+.meter-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+  color: var(--mid);
+}
+
+.meter-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meter-reset {
+  margin-top: 3px;
+  color: var(--faint);
+}
+
+.meter-value {
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.note-line {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--fg);
+}
+
+.note-line small {
+  font-size: 11px;
+  color: var(--faint);
+}
+
+.note-line.is-action {
+  cursor: pointer;
+}
+
+.note-line.is-action:hover span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.meta {
+  color: var(--faint);
+}
+
+.quiet {
+  margin: 0;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--mid);
+  text-align: left;
+}
+
+.quiet.link:hover {
+  color: var(--fg);
+}
+
+/* ---------------------------------------------------------------- motion */
+
+@keyframes reveal {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes conceal {
+  from {
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes drip {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  66% {
+    opacity: 1;
+    transform: translateY(2px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
